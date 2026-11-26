@@ -15,6 +15,8 @@ jobs:
           java-version: 17
       - name: Unzip project
         run: unzip -q AlucardBoss-Forge-1.20.1.zip
+      - name: Fix author text
+        run: sed -i 's/^mod_authors=.*/mod_authors=HyperSoulPH (original addon), ported by Claude/' AlucardBoss-Forge-1.20.1/gradle.properties
       - name: Build
         working-directory: AlucardBoss-Forge-1.20.1
         run: |
