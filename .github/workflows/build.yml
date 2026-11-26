@@ -1,27 +1,29 @@
-name: Build AlucardBoss
-
+name: Build jar
 on:
+  push:
   workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-
-      - name: Build mod
-        run: chmod +x gradlew && ./gradlew build
-
-      - name: Upload JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: AlucardBoss-Forge-1.20.1
-          path: build/libs/*.jar
+          java-version: 17
+      - name: Unzip project
+        run: unzip -q AlucardBoss-Forge-1.20.1.zip
+      - name: Build
+        working-directory: AlucardBoss-Forge-1.20.1
+        run: |
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+      - name: Publish jar as a release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          JAR=$(ls AlucardBoss-Forge-1.20.1/build/libs/*.jar | grep -v -- '-sources' | head -n 1)
+          gh release delete jar --yes --cleanup-tag || true
+          gh release create jar "$JAR" --title "Alucard jar" --notes "Download the .jar below"
